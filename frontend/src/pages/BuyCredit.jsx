@@ -8,7 +8,9 @@ import { toast } from 'react-toastify'
 
 const BuyCredit = () => {
 
-  const { user, backendUrl, loadCreditData, setShowLogin } = useContext(AppContext)
+  const { user, backendUrl, loadCreditData, setShowLogin,token } = useContext(AppContext)
+
+  console.log(token)
 
   const navigate = useNavigate()
 
@@ -27,9 +29,7 @@ const BuyCredit = () => {
           const res=await axios.post(`${backendUrl}/api/v1/users/verify-razor`,response,
             {withCredentials:true}
           )
-          const paymentInfo=res.data;
-          console.log(paymentInfo);
-          
+          const paymentInfo=res.data;          
           if(paymentInfo.success){
             loadCreditData()
             navigate('/')

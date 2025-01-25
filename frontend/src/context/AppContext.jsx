@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import {useNavigate} from 'react-router-dom'
 import axios from 'axios'
+import Cookies from 'js-cookie';
 import { toast } from "react-toastify";
 
 export const AppContext=createContext()
@@ -9,7 +10,7 @@ const AppContextProvider=(props)=>{
     const [user,setUser]=useState(null);
     const [showLogin,setShowLogin]=useState(false);
     const [credit,setCredit]=useState(false)
-    const [token,setToken]=useState('')
+    const [token,setToken]=useState('.')
 
     const backendUrl=import.meta.env.VITE_BACKEND_URL
 
@@ -20,6 +21,7 @@ const AppContextProvider=(props)=>{
             const response=await axios.get(`${backendUrl}/api/v1/users/getUser`,
                 {withCredentials: true})
             const userInfo=response.data
+            console.log(response)
             if(userInfo.success){
                 setCredit(userInfo.data.creditBalance)
                 setUser(userInfo.data)
@@ -40,9 +42,6 @@ const AppContextProvider=(props)=>{
             const response=await axios.post(`${backendUrl}/api/v1/image/generate-image`,{prompt},
                 {withCredentials: true}
             )
-            const imageInfo=response.data
-            console.log(imageInfo);
-            
             if(imageInfo.success){
                 loadCreditData()
                 return imageInfo.data.resultImage

@@ -10,7 +10,6 @@ import { AppContext } from './context/AppContext'
 import { ToastContainer } from 'react-toastify';
 
 const App = () => {
-
   const {showLogin}=useContext(AppContext)
 
   return (
