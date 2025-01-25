@@ -2,7 +2,8 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import mongoose from "mongoose";
+import razorpay from 'razorpay'
+import { Transaction } from "../models/transaction.model.js";
 
 const generateAccessAndRefreshToken=async(userId)=>{
         try {
@@ -130,9 +131,102 @@ const getUserDetails=asyncHandler(async (req,res)=>{
     )
 })
 
+const razorpayInstance=new razorpay({
+    key_id:process.env.RAZORPAY_KEY_ID,
+    key_secret:process.env.RAZORPAY_KEY_SECRET,
+})
+
+
+const paymentRazarpay=asyncHandler(async(req,res)=>{
+    const {planId}=req.body
+    const user=req.user
+    if(!user || !planId){
+        throw new ApiError(400,"Missing details")
+    }
+
+    let plan,credits,amount,date
+    
+    switch (planId) {
+        case 'Basic':
+            plan='Basic'
+            credits=100
+            amount=10
+            break;
+        
+            case 'Advanced':
+                plan='Advanced'
+                credits=500
+                amount=50
+                break;
+
+            case 'Business':
+                plan='Business'
+                credits=5000
+                amount=250
+                break;
+        default:
+            throw new ApiError(400,"Plan not found")
+    }
+    date=Date.now()
+
+    const transactionData={
+        userId:user._id,
+        plan, amount,credits,date
+    }
+
+    const newTransaction=await Transaction.create(transactionData)
+
+    const options={
+        amount:amount*100,
+        currency:process.env.CURRENCY,
+        receipt:newTransaction._id
+    }
+
+    await razorpayInstance.orders.create(options,(error,order)=>{
+        if(error){
+            console.log(error);
+            throw new ApiError(402,error)
+        }
+        return res.status(202).json(new ApiResponse(202,order,"payment processed"))
+    })
+
+})
+
+const verifyRazorPay=asyncHandler(async(req,res)=>{
+
+    const {razorpay_order_id}=req.body
+
+    const orderInfo=await razorpayInstance.orders.fetch(razorpay_order_id)
+
+    if(orderInfo.status==='paid'){
+        const transactionData=await Transaction.findById(orderInfo.receipt)
+
+        if(transactionData.payment){
+            throw new ApiError(402,"Payment failed")
+        }
+
+        const userData=await User.findById(transactionData.userId)
+
+        const creditBalance=userData.creditBalance+transactionData.credits
+        
+        await User.findByIdAndUpdate(userData._id,{
+            creditBalance
+        })
+        await Transaction.findByIdAndUpdate(transactionData._id,{payment:true})
+
+        return res.status(202).json(new ApiResponse(202,"","Credits Added"))
+    }
+    else{
+        throw new ApiError(402,"Payment failed")
+    }
+
+})
+
 export {
     registerUser,
     login,
     logoutUser,
-    getUserDetails
+    getUserDetails,
+    paymentRazarpay,
+    verifyRazorPay
 }

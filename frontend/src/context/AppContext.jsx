@@ -41,18 +41,17 @@ const AppContextProvider=(props)=>{
                 {withCredentials: true}
             )
             const imageInfo=response.data
+            console.log(imageInfo);
+            
             if(imageInfo.success){
                 loadCreditData()
                 return imageInfo.data.resultImage
             }
-            else{
-                if(imageInfo.data.creditBalance===0)
-                    navigate('/buy')
-            }
 
         } catch (error) {
-            if (error.response && error.response.data) {
+            if (error.response && error.response.data) {                
                 toast.error(error.response.data.message || 'Something went wrong');
+                navigate('/buy')
             } else {
                 toast.error('An unexpected error occurred');
             }
