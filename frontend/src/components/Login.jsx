@@ -2,12 +2,54 @@ import React, { useContext, useEffect, useState } from 'react'
 import { assets } from '../assets/assets'
 import { AppContext } from '../context/AppContext';
 import { motion } from 'motion/react';
+import axios from 'axios'
+import { toast } from 'react-toastify';
 
 
 const Login = () => {
 
     const [state,setState]=useState('Login');   
-    const {setShowLogin}=useContext(AppContext)
+    const {showLogin,setShowLogin,backendUrl,token,setToken,setUser}=useContext(AppContext)
+
+    const [fullName,setName]=useState('')
+    const[email,setEmail]=useState('')
+    const[password,setPassword]=useState('')
+
+    const onSubmitHandler=async(e)=>{
+        e.preventDefault();
+
+        try {
+            if(state==='Login'){
+                const response=await axios.post(`${backendUrl}/api/v1/users/login`,
+                    {email,password},{withCredentials:true}
+                )
+                const userInfo=response.data
+                if(userInfo.success){
+                    setToken(userInfo.data.accessToken)
+                    setShowLogin(false)
+                    setUser(userInfo.data.user)
+                }
+                
+            }
+            else{
+                const response=await axios.post(`${backendUrl}/api/v1/users/signup`,
+                    {fullName,email,password}
+                )
+                const userInfo=response.data
+                
+                if(userInfo.success){
+                    setState('Login')
+                    setUser(userInfo.data.user)
+                }
+            }
+        } catch (error) {
+            if (error.response && error.response.data) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Something went wrong. Please try again.");
+            }
+        }
+    }
 
     useEffect(()=>{
         document.body.style.overflow='hidden';
@@ -19,7 +61,7 @@ const Login = () => {
   return (
     <div className='fixed left-0 right-0 top-0 bottom-0 z-10 backdrop-blur-sm bg-black/30 flex justify-center items-center'>
 
-    <motion.form
+    <motion.form onSubmit={onSubmitHandler}
     initial={{opacity:0.2,y:50}}
     transition={{duration:0.3}}
     whileInView={{opacity:1,y:0}}
@@ -33,6 +75,8 @@ const Login = () => {
             <input 
             type="text"
             className='outline-none text-sm'
+            onChange={(e)=>setName(e.target.value)}
+            value={fullName}
             placeholder='Full Name'
             required
             />
@@ -44,6 +88,8 @@ const Login = () => {
             <input 
             type="email"
             className='outline-none text-sm'
+            onChange={(e)=>setEmail(e.target.value)}
+            value={email}
             placeholder='Email id'
             required
             />
@@ -53,6 +99,8 @@ const Login = () => {
             <input 
             type="password"
             className='outline-none text-sm'
+            onChange={(e)=>setPassword(e.target.value)}
+            value={password}
             placeholder='Password'
             required
             />
