@@ -4,6 +4,10 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import razorpay from 'razorpay'
 import { Transaction } from "../models/transaction.model.js";
+import { oauth2client } from "../utils/googleConfig.js";
+import axios from 'axios'
+import crypto from 'crypto';
+
 
 const generateAccessAndRefreshToken=async(userId)=>{
         try {
@@ -89,6 +93,56 @@ const login=asyncHandler(async (req,res)=>{
             200,
             {
                 user:loggedInUser,
+                accessToken,
+                refreshToken
+            },
+            "user singned successfully"
+        )
+    )
+
+})
+
+const googleLogin=asyncHandler(async (req,res)=>{
+    const {code}=req.query;
+    const googleRes=await oauth2client.getToken(code)
+    oauth2client.setCredentials(googleRes.tokens)
+
+    const userRes=await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`)
+
+    if(!userRes){
+        throw new ApiError(500,"google api Error!")
+    }
+
+    const {email,name:fullName,picture:avatar}=userRes.data
+    let user=await User.findOne({email})
+
+    if(!user){
+        const randomPassword = crypto.randomBytes(16).toString('hex');
+        user=await User.create({
+            fullName,
+            password:randomPassword,
+            email,
+            avatar
+        })
+    }
+    const {accessToken,refreshToken}=await generateAccessAndRefreshToken(user._id);
+
+    user=await User.findByIdAndUpdate(user._id,{refreshToken},{new:true}).select("-password -refreshToken")
+
+    const options={
+        httpOnly:true,
+        secure:true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user,
                 accessToken,
                 refreshToken
             },
@@ -228,5 +282,6 @@ export {
     logoutUser,
     getUserDetails,
     paymentRazarpay,
-    verifyRazorPay
+    verifyRazorPay,
+    googleLogin
 }

@@ -8,15 +8,19 @@ import Footer from './components/Footer'
 import Login from './components/Login'
 import { AppContext } from './context/AppContext'
 import { ToastContainer } from 'react-toastify';
+import {GoogleOAuthProvider} from '@react-oauth/google'
+
 
 const App = () => {
-  const {showLogin}=useContext(AppContext)
+  const {showLogin,token}=useContext(AppContext)
 
   return (
     <div className='px-4 sm:px-10 md:px-14 lg:px-28 min-h-screen bg-gradient-to-b from-teal-50 to-orange-50'>
       <ToastContainer position='bottom-right'/>
     <Navbar/>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE__CILENT_ID}>
     {showLogin && <Login/>}
+    </GoogleOAuthProvider>
     <Routes>
       <Route path='/' element={<Home/>}/>
       <Route path='/result' element={<Result/>}/>

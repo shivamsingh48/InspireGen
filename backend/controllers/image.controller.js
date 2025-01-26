@@ -27,36 +27,41 @@ export const generateImage=asyncHandler(async (req,res)=>{
     const formData=new FormData()
     formData.append("prompt",prompt)
 
-   const {data}= await axios.post('https://clipdrop-api.co/text-to-image/v1',formData,{
-        headers: {
-            'x-api-key': process.env.CLIPDROP_API,
-          },
-          responseType:"arraybuffer"
-    })
-
-    const base64Image=Buffer.from(data,'binary').toString('base64')
-    const resultImage=`data:image/png;base64,${base64Image}`
-
-    await User.findByIdAndUpdate(
-        user._id,
-        {
-            creditBalance:user.creditBalance-1
-        },
-        {
-            new:true
-        }
-    )
-
-    return res.status(201)
-    .json(
-        new ApiResponse(
-            201,
-            {
-                creditBalance:user.creditBalance,
-                resultImage
-            },
-            "Image generated successfully"
-        )
-    )
+   try {
+    const {data}= await axios.post('https://clipdrop-api.co/text-to-image/v1',formData,{
+         headers: {
+             'x-api-key': process.env.CLIPDROP_API,
+           },
+           responseType:"arraybuffer"
+     })
+ 
+     const base64Image=Buffer.from(data,'binary').toString('base64')
+     const resultImage=`data:image/png;base64,${base64Image}`
+ 
+     await User.findByIdAndUpdate(
+         user._id,
+         {
+             creditBalance:user.creditBalance-1
+         },
+         {
+             new:true
+         }
+     )
+ 
+     return res.status(201)
+     .json(
+         new ApiResponse(
+             201,
+             {
+                 creditBalance:user.creditBalance,
+                 resultImage
+             },
+             "Image generated successfully"
+         )
+     )
+   } catch (error) {
+        console.error(error);
+        throw new ApiError(500, "Failed to generate image. Please try again later.");
+   }
     
 })

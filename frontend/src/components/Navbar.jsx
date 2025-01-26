@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 
 const Navbar = () => {
-  const {user,setUser,setShowLogin,credit,logout,}=useContext(AppContext)
+  const {user,setUser,setShowLogin,credit,logout,profile}=useContext(AppContext)
   
   const navigate=useNavigate()
 
@@ -20,7 +20,7 @@ const Navbar = () => {
             </button>
             <p className='text-gray-600 max-sm:hidden pl-4'>Hi, {user.fullName}</p>
             <div className='relative group'>
-              <img src={assets.profile_icon} className='w-10 drop-shadow' alt="" />
+              <img src={profile||assets.profile_icon} className='w-10 drop-shadow rounded-b-full' alt="" />
               <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12'>
                 <ul className='list-none m-0 p-2 bg-white rounded-md border text-sm'>
                   <li 

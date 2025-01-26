@@ -10,8 +10,6 @@ const BuyCredit = () => {
 
   const { user, backendUrl, loadCreditData, setShowLogin,token } = useContext(AppContext)
 
-  console.log(token)
-
   const navigate = useNavigate()
 
   const initPay=async(order)=>{

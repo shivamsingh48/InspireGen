@@ -4,16 +4,43 @@ import { AppContext } from '../context/AppContext';
 import { motion } from 'motion/react';
 import axios from 'axios'
 import { toast } from 'react-toastify';
-
+import {useGoogleLogin} from '@react-oauth/google'
 
 const Login = () => {
 
     const [state,setState]=useState('Login');   
-    const {showLogin,setShowLogin,backendUrl,token,setToken,setUser}=useContext(AppContext)
+    const {showLogin,setShowLogin,backendUrl,token,setToken,setUser,setProfile}=useContext(AppContext)
 
     const [fullName,setName]=useState('')
     const[email,setEmail]=useState('')
     const[password,setPassword]=useState('')
+
+    const responseGoogle=async(authResult)=>{
+        try {
+            if(authResult['code']){
+                const result=await axios.get(`${backendUrl}/api/v1/users/google?code=${authResult['code']}`,{
+                    withCredentials:true
+                })
+                const userInfo=result.data                                
+                if(userInfo.success){
+                    setToken(userInfo.data.accessToken)
+                    setShowLogin(false)
+                    setUser(userInfo.data.user)
+                    setProfile(userInfo.data.user.avatar)
+                }
+            }
+            
+        } catch (error) {
+            console.log("error with requesting google: ",error);
+            
+        }
+    }
+
+    const googleLogin=useGoogleLogin({
+        onSuccess:responseGoogle,
+        onError:responseGoogle,
+        flow:'auth-code'
+    })
 
     const onSubmitHandler=async(e)=>{
         e.preventDefault();
@@ -69,7 +96,9 @@ const Login = () => {
     className='relative bg-white p-10 rounded-xl text-slate-500'>
         <h1 className='text-center text-2xl text-neutral-700 font-medium'>{state}</h1>
         <p>Welcome back! Please sign in to continue</p>
-
+        <button onClick={googleLogin} className='ml-16 text-blue-500'>
+            login with google
+        </button>
         {state!=='Login' && <div className='border px-5 py-2 flex items-center gap-2 rounded-full mt-4'>
             <img src={assets.profile_icon} className='w-5' alt="" />
             <input 
