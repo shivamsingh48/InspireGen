@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import axios from 'axios'
 import { toast } from 'react-toastify';
 import { useGoogleLogin } from '@react-oauth/google'
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
 
@@ -14,6 +15,27 @@ const Login = () => {
     const [fullName, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [errors, setErrors] = useState({});
+    const [passwordVisible, setPasswordVisible] = useState(false);
+
+
+    const validateInputs = () => {
+        const validationErrors = {};
+
+        if (!email.trim()) {
+            validationErrors.email = "Email is required";
+        } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+            validationErrors.email = "Invalid email format";
+        }
+
+        if (!password.trim()) {
+            validationErrors.password = "Password is required";
+        } else if (password.length < 6) {
+            validationErrors.password = "Password must be at least 6 characters long";
+        }
+
+        return validationErrors;
+    };
 
     const responseGoogle = async (authResult) => {
         try {
@@ -44,6 +66,13 @@ const Login = () => {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
+
+        const validationErrors = validateInputs();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        setErrors({});
 
         try {
             if (state === 'Login') {
@@ -118,7 +147,6 @@ const Login = () => {
                         required
                     />
                 </div>
-
                 }
                 <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-5'>
                     <img src={assets.email_icon} alt="" />
@@ -131,18 +159,29 @@ const Login = () => {
                         required
                     />
                 </div>
-                <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-4'>
+                {errors.email && (
+                    <p className="text-red-500 text-xs">{errors.email}</p>
+                )}
+                <div className='border px-6 py-2 flex items-center gap-2 rounded-full mt-4 relative'>
                     <img src={assets.lock_icon} alt="" />
                     <input
-                        type="password"
+                        type={passwordVisible ? "text" : "password"}
                         className='outline-none text-sm'
                         onChange={(e) => setPassword(e.target.value)}
                         value={password}
                         placeholder='Password'
                         required
                     />
+                    <span
+                        onClick={() => setPasswordVisible(!passwordVisible)}
+                        className='absolute right-3 cursor-pointer text-gray-500'
+                    >
+                        {passwordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </span>
                 </div>
-
+                {errors.password && (
+                    <p className="text-red-500 text-xs">{errors.password}</p>
+                )}
                 <p className='text-sm text-blue-600 my-4 cursor-pointer ml-4'> Forgot password? </p>
 
                 <button
