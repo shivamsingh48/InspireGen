@@ -28,6 +28,7 @@ const AppContextProvider=(props)=>{
             }
         } catch (error) {
             if (error.response && error.response.data) {
+                if(token!=='.')
                 toast.error(error.response.data.message || 'Something went wrong');
             } else {
                 toast.error('An unexpected error occurred');

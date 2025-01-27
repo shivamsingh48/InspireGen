@@ -10,12 +10,11 @@ const Result = () => {
   const[loading,setLoading]=useState(false);
   const[input,setInput]=useState("");
 
-  const {generateImage}=useContext(AppContext)
+  const {generateImage,setShowLogin,user}=useContext(AppContext)
 
   const handleSubmit=async(e)=>{
       e.preventDefault()
       setLoading(true)
-
       if(input){
         const image=await generateImage(input)
         if(image){
@@ -50,6 +49,7 @@ const Result = () => {
       onChange={(e)=>(setInput(e.target.value))} value={input}
       />
       <button 
+      onClick={()=>(!user && setShowLogin(true))}
       type='submit' 
       className='bg-zinc-900 px-10 sm:px-16 py-3 rounded-full'>
         Generate
