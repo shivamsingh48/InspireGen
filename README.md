@@ -15,12 +15,14 @@ Access the live application here: [InspireGen](https://inspiregen.onrender.com/)
 - Styled with **Tailwind CSS** for responsiveness and a clean design.
 - Integrated with **Framer Motion** for smooth animations and transitions.
 - Implements **Google OAuth** for user authentication.
+- Integrated **Payment Gateway** for secure credit purchases.
 
 ### Backend
 - Developed with **Node.js** and **Express.js**.
 - Uses **MongoDB** for database management.
 - Integrates AI APIs for text-to-image generation.
 - Secure authentication with **JWT tokens**.
+- Manages payment transactions via a **Payment Gateway** (e.g., Razorpay).
 
 ---
 
@@ -30,13 +32,15 @@ Access the live application here: [InspireGen](https://inspiregen.onrender.com/)
 1. **AI-Powered Text-to-Image Conversion**: Create images by simply typing a description.
 2. **User Authentication**: Secure login using Google OAuth.
 3. **Credits System**: Users can purchase credits to generate images.
-4. **Responsive Design**: Optimized for all screen sizes.
-5. **Real-Time Notifications**: Toast notifications for smooth user interactions.
+4. **Payment Gateway**: Secure and seamless credit purchase via Razorpay.
+5. **Responsive Design**: Optimized for all screen sizes.
+6. **Real-Time Notifications**: Toast notifications for smooth user interactions.
 
 ### Admin Features
 - Manage user accounts.
 - Monitor credit usage and purchases.
 - Oversee system performance and API usage.
+- Track payment transactions.
 
 ---
 
@@ -55,6 +59,7 @@ Access the live application here: [InspireGen](https://inspiregen.onrender.com/)
 - Express.js
 - MongoDB
 - JWT Authentication
+- Razorpay Payment Gateway
 - AI API Integration (for text-to-image generation)
 
 ---
@@ -67,5 +72,5 @@ Access the live application here: [InspireGen](https://inspiregen.onrender.com/)
 
 ### Clone Repository
 ```bash
-git clone https://github.com/shivamsingh48/InspireGen.git
+git clone https://github.com/yourusername/InspireGen.git
 cd InspireGen
