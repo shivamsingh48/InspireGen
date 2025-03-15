@@ -11,10 +11,17 @@ const AppContextProvider=(props)=>{
     const [credit,setCredit]=useState(false)
     const [token,setToken]=useState('.')
     const [profile,setProfile]=useState('')
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
     const backendUrl=import.meta.env.VITE_BACKEND_URL
 
     const navigate=useNavigate()
+
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+    }
 
     const loadCreditData=async()=>{
         try {
@@ -81,10 +88,15 @@ const AppContextProvider=(props)=>{
         }
     },[token])
 
+    useEffect(() => {
+        // Apply theme when component mounts or theme changes
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(theme);
+    }, [theme]);
 
     const value={
         user,setUser,showLogin,setShowLogin,backendUrl,token,setToken,credit,setCredit,loadCreditData,logout,generateImage,
-        profile,setProfile
+        profile,setProfile,theme,toggleTheme
     }
     return (
         <AppContext.Provider value={value}>

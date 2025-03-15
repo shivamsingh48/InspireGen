@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 const Header = () => {
 
-    const {user,setShowLogin}=useContext(AppContext);
+    const {user,setShowLogin,theme}=useContext(AppContext);
     const navigate=useNavigate();
 
     const onClickHandler=()=>{
@@ -25,7 +25,7 @@ const Header = () => {
     viewport={{once:true}}
     >
 
-        <motion.div className='text-stone-500 inline-flex text-center gap-2 bg-white px-6 py-1 rounded-full border border-neutral-500'
+        <motion.div className={`text-stone-500 inline-flex text-center gap-2 px-6 py-1 rounded-full border border-neutral-500 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
         initial={{opacity:0,y:-20}}
         animate={{opacity:1,y:0}}
         transition={{delay:0.2,duration:0.8}}
@@ -39,7 +39,7 @@ const Header = () => {
         transition={{delay:0.4,duration:2}}
         >image</span>, in seconds.</motion.h1>
     
-        <motion.p className='text-center max-w-xl mx-auto mt-5'
+        <motion.p className='text-center max-w-xl mx-auto mt-5 text-gray-600 dark:text-gray-400'
         initial={{opacity:0,y:20}}
         animate={{opacity:1,y:0}}
         transition={{delay:0.6,duration:0.8}}
@@ -49,7 +49,7 @@ const Header = () => {
 
         <motion.button 
         onClick={onClickHandler}
-        className='sm:text-lg text-white bg-black w-auto mt-8 px-12 py-2.5 flex items-center gap-2 rounded-full'
+        className={`sm:text-lg text-white ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-black hover:bg-gray-800'} w-auto mt-8 px-12 py-2.5 flex items-center gap-2 rounded-full`}
         whileHover={{scale:1.05}}
         whileTap={{scale:0.95}}
         initial={{opacity:0}}
@@ -76,7 +76,7 @@ const Header = () => {
         initial={{opacity:0}}
         animate={{opacity:1}}
         transition={{delay:1.2,duration:0.8}}
-        className='mt-2 text-neutral-600'>Generated images from InspireGen</motion.p>
+        className='mt-2 text-neutral-600 dark:text-gray-400'>Generated images from InspireGen</motion.p>
     </motion.div>
   )
 }
