@@ -6,6 +6,7 @@ import Result from './pages/Result'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Login from './components/Login'
+import ResetPassword from './components/ResetPassword'
 import StaticFavicon from './components/StaticFavicon'
 import SplashScreen from './components/SplashScreen'
 import { AppContext } from './context/AppContext'
@@ -50,6 +51,7 @@ const App = () => {
             <Route path='/' element={<Home/>}/>
             <Route path='/result' element={<Result/>}/>
             <Route path='/buy' element={<BuyCredit/>}/>
+            <Route path='/reset-password' element={<ResetPassword/>}/>
           </Routes>
           <Footer/>
         </div>

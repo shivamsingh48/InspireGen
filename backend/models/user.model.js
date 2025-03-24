@@ -25,20 +25,32 @@ const userSchema=new Schema({
     },
     refreshToken:{
         type:String
+    },
+    resetPasswordToken:{
+        type:String
+    },
+    resetPasswordTokenExpiry:{
+        type:Date
     }
 },{
     timestamps:true
 }
 )
 
-userSchema.pre('save',async function(next){
-    if(!this.isModified("password")) return next()
-    this.password=await bcrypt.hash(this.password,10);
+userSchema.pre('save', async function (next) {
+    if (this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10);
+    }
     next();
 })
 
+
 userSchema.methods.isPasswordCheck=async function(password){
     return await bcrypt.compare(password,this.password)
+}
+
+userSchema.methods.isResetPasswordTokenCheck=async function(token){
+    return await bcrypt.compare(token,this.resetPasswordToken)
 }
 
 userSchema.methods.generateAccessToken=function(){

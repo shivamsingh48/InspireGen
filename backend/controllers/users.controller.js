@@ -6,7 +6,10 @@ import razorpay from 'razorpay'
 import { Transaction } from "../models/transaction.model.js";
 import { oauth2client } from "../utils/googleConfig.js";
 import axios from 'axios'
+import bcrypt from 'bcrypt'
 import crypto from 'crypto';
+import { sendMail } from "../utils/sendMail.js";
+import { createResetPasswordEmail } from "../utils/emailTemplates.js";
 
 
 const generateAccessAndRefreshToken=async(userId)=>{
@@ -279,6 +282,96 @@ const verifyRazorPay=asyncHandler(async(req,res)=>{
 
 })
 
+const forgotPassword=asyncHandler(async(req,res)=>{
+    const {email}=req.body
+
+    if(!email){
+        throw new ApiError(400,"Email is required")
+    }
+
+    const user=await User.findOne({email})
+    
+    if(!user){
+        throw new ApiError(400,"User not found")
+    }
+
+    let resetPasswordToken=crypto.randomBytes(32).toString('hex')
+
+    resetPasswordToken = await bcrypt.hash(resetPasswordToken, 10);
+
+    user.resetPasswordToken=resetPasswordToken
+    user.resetPasswordTokenExpiry=Date.now()+1000*60*15
+    await user.save({validateBeforeSave:false})
+
+    const resetPasswordUrl=`${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}&email=${email}`
+    
+    const emailHtml = createResetPasswordEmail(resetPasswordUrl);
+    
+    try {
+        await sendMail(email, "Reset Password", "Click the link to reset your password", emailHtml);
+        
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {},
+                "Password reset link sent successfully"
+            )
+        );
+    } catch (error) {
+        // Reset the token if email fails
+        user.resetPasswordToken = undefined;
+        user.resetPasswordTokenExpiry = undefined;
+        await user.save({validateBeforeSave: false});
+        console.log(error)
+
+        throw new ApiError(500, "Error sending password reset email");
+    }
+})
+
+const resetPassword=asyncHandler(async(req,res)=>{
+    const {email,token,password}=req.body
+
+    if(!email || !token || !password){
+        throw new ApiError(400,"Missing details")
+    }
+
+    const user=await User.findOne({email})
+
+    if(!user){
+        throw new ApiError(401,"Unauthorized access")
+    }
+
+    if(user.resetPasswordTokenExpiry<Date.now()){
+        throw new ApiError(400,"Token expiry please try again")
+    }
+
+
+    const verify=await user.isResetPasswordTokenCheck(token)
+
+
+    if(!verify){
+        throw new ApiError(401,"Verification failed")
+    }
+
+    console.log(verify)
+
+    user.password=password
+    user.resetPasswordToken=null
+    user.resetPasswordTokenExpiry=null
+    await user.save()
+
+    
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {},
+            "Password reset successfully"
+        )
+    )
+
+})
+
 export {
     registerUser,
     login,
@@ -286,5 +379,7 @@ export {
     getUserDetails,
     paymentRazarpay,
     verifyRazorPay,
-    googleLogin
+    googleLogin,
+    forgotPassword,
+    resetPassword
 }
